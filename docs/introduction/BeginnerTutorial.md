@@ -1,35 +1,38 @@
-# Beginner Tutorial
+# Руководство для начинающих
 
-## Objectives of this tutorial
+## Цель данного руководства
 
-This tutorial attempts to introduce redux-saga in a (hopefully) accessible way.
+Это руководство предназначено для введения в redux-saga в доступной(надеюсь, что это так) форме.
 
-For our getting started tutorial, we are going to use the trivial Counter demo from the Redux repo. The application is quite simple but is a good fit to illustrate the basic concepts of redux-saga without being lost in excessive details.
+Первым шагом в изучении этого руководства, мы рассмотрим пример простого счетчика из репозитория Redux. Это приложение довольно простое, но оно хорошо илюстрирует основную мысль redux-saga и начинающий не потеряет сути в излишнем обилии деталей.
 
-### The initials setup
+### Установка примера
 
-Before we start, clone the [tutorial repository](https://github.com/yelouafi/redux-saga-beginner-tutorial).
+Сначала нам нужно склонировать [репозиторий](https://github.com/yelouafi/redux-saga-beginner-tutorial).
 
-> The final code of this tutorial is located in the `sagas` branch.
+```sh
+$ git clone https://github.com/yelouafi/redux-saga-beginner-tutorial.git
+```
 
-Then in the command line, run:
+> Финальный результат кода после выполнения руководства находится в ветке `sagas`.
+
+Затем переходим в корневую директорию репозитория и устанавливаем зависимости:
 
 ```sh
 $ cd redux-saga-beginner-tutorial
 $ npm install
 ```
 
-To start the application, run:
+Запускаем приложение:
 
 ```sh
 $ npm start
 ```
+Открываем в браузере: http://192.168.1.65:9966/
 
-We are starting with the simplest use case: 2 buttons to `Increment` and `Decrement` a counter. Later, we will introduce asynchronous calls.
+Мы запустили элементарный счетчик состоящий из 2 кнопок `Increment` *(увеличить на 1) и `Decrement` *(уменьшить на 1) и поля вывода текущего значения счетчика. В дальнейшим мы познакомимся с асинхронными вызовами.
 
-If things go well, you should see 2 buttons `Increment` and `Decrement` along with a message below showing `Counter: 0`.
-
-> In case you encountered an issue with running the application. Feel free to create an issue on the [tutorial repo](https://github.com/yelouafi/redux-saga-beginner-tutorial/issues).
+> Если у вас возникли трудности и не удалось запустить приложение. Вы можете посмотреть возникшие трудности и их решения или же если ваш случай еще не встречался создать свой issue в оригинальном [репозитории с руководством](https://github.com/yelouafi/redux-saga-beginner-tutorial/issues).
 
 ## Hello Sagas!
 
