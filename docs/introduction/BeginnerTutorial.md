@@ -57,7 +57,6 @@ export function* helloSaga() {
 
 ```javascript
 // ...
-import { createStore, applyMiddleware } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 
 // ...
@@ -81,23 +80,25 @@ sagaMiddleware.run(helloSaga)
 
 ## Создаем Асинхронные вызовы
 
-Now let's add something closer to the original Counter demo. To illustrate asynchronous calls, we will add another button to increment the counter 1 second after the click.
+Теперь настало время сделать что-то более похожее на то, что мы видели в примере счетчика. Рассмотрим работу асинхронных вызовов, сделаем еще одну кнопку, которая будет увеличивать значение счетчика спустя 1 секунду после нажатия.
 
-First thing's first, we'll provide an additional callback `onIncrementAsync` to the UI component.
+Модифицируем наш компонент Counter в `Counter.js` - добавим ему новую кнопку, которая при клике будет вызывать [callback-функцию][https://ru.wikipedia.org/wiki/Callback_(%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)] `onIncrementAsync`
 
 ```javascript
 const Counter = ({ value, onIncrement, onDecrement, onIncrementAsync }) =>
+// ...
   <div>
     {' '}
     <button onClick={onIncrementAsync}>Increment after 1 second</button>
     <hr />
     <div>Clicked: {value} times</div>
   </div>
+// ...
 ```
 
-Next we should connect the `onIncrementAsync` of the Component to a Store action.
+Дальше реализуем функцию `onIncrementAsync` чтобы она отправляла action в Store.
 
-We will modify the `main.js` module as follows
+`main.js` модифицируется следующим образом:
 
 ```javascript
 function render() {
@@ -110,35 +111,39 @@ function render() {
 }
 ```
 
-Note that unlike in redux-thunk, our component dispatches a plain object action.
+Примечание: в отличие от redux-thunk, наш компонент **отправляет** в action **объект**, а не функцию возвращающую объект.
 
-Now we will introduce another Saga to perform the asynchronous call. Our use case is as follows:
+Сейчас мы создадим еще одну Сагу которая будет выполнять асинхронный вызов. В нашем случае она будет:
 
-> On each `INCREMENT_ASYNC` action, we want to start a task that will do the following
+> на каждый `INCREMENT_ASYNC` action - запускать функцию, которая:
 
-> - Wait 1 second then increment the counter
+> - будет ждать 1 секунду, и после этого увиличивать значение счетчика.
 
 Add the following code to the `sagas.js` module:
+Добавим следующий код в `sagas.js`:
 
 ```javascript
 import { takeEvery, delay } from 'redux-saga'
 import { put } from 'redux-saga/effects'
 
 // Our worker Saga: will perform the async increment task
+// наша Сага-рабочий: выполняет асинхронную работу
 export function* incrementAsync() {
   yield delay(1000)
   yield put({ type: 'INCREMENT' })
 }
 
-// Our watcher Saga: spawn a new incrementAsync task on each INCREMENT_ASYNC
+// наша Сага-надзиратель: просматривает поток actions и на каждый action типа: INCREMENT_ASYNC заставляет работать Сагу-рабочего
+// *(если точнее: создает новый экземпляр Саги-рабочего, который умирает выполнив свою работу.)
+// При takeEvery могут одновременно жить несколько экземпляров Саг-рабочих(близнецов), выполняющих параллельно одну и ту же работу.
 export function* watchIncrementAsync() {
   yield takeEvery('INCREMENT_ASYNC', incrementAsync)
 }
 ```
 
-Time for some explanations.
+Самое время объяснить, что тут происходит.
 
-We import `delay`, a utility function that returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) that will resolve after a specified number of milliseconds. We'll use this function to *block* the Generator.
+Мы импортируем `delay`, вспомогательную функцию `redux-saga` возвращающую [Promise](https://learn.javascript.ru/promise) который перейдет в состояние resolve после ожидания переданного значения милисекунд. Мы будем использовать эту функцию чтобы *блокировать* генератор.
 
 Sagas are implemented as [Generator functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*) that *yield* objects to the redux-saga middleware. The yielded objects are a kind of instruction to be interpreted by the middleware. When a Promise is yielded to the middleware, the middleware will suspend the Saga until the Promise completes. In the above example, the `incrementAsync` Saga is suspended until the Promise returned by `delay` resolves, which will happen after 1 second.
 
