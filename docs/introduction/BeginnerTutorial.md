@@ -36,9 +36,9 @@ $ npm start
 
 ## Hello Sagas!
 
-We are going to create our first Saga. Following the tradition, we will write our 'Hello, world' version for Sagas.
+Давайте создадим нашу первую Сагу. Не будем нарушать традиций, и напишем реализацию 'Hello, world' на Сагах.
 
-Create a file `sagas.js` then add the following snippet:
+Создадим файл `sagas.js`, затем добавим в него следующий код:
 
 ```javascript
 export function* helloSaga() {
@@ -46,14 +46,14 @@ export function* helloSaga() {
 }
 ```
 
-So nothing scary, just a normal function (except for the `*`). All it does is print a greeting message into the console.
+Попрошу отставить панику, это обычная функция (если забыть про `*`). Она выводит сообщение в консоль.
 
-In order to run our Saga, we need to:
+Для того чтобы запустить нашу Сагу, нам нужно:
 
-- create a Saga middleware with a list of Sagas to run (so far we have only one `helloSaga`)
-- connect the Saga middleware to the Redux store
+- создать `redux-saga` middleware, в которую мы передадим список Саг - которые хотим запустить (у нас пока будет всего одна `helloSaga`)
+- подключить `redux-saga` middleware в Redux Store
 
-We will make the changes to `main.js`:
+Теперь изменим `main.js`:
 
 ```javascript
 // ...
@@ -70,16 +70,16 @@ const store = createStore(
 )
 sagaMiddleware.run(helloSaga)
 
-// rest unchanged
+// остальное без изменений
 ```
 
-First we import our Saga from the `./sagas` module. Then we create a middleware using the factory function `createSagaMiddleware` exported by the `redux-saga` library.
+Сначала, мы импортируем наш модуль Саги из `./sagas`. Затем создаем middleware используя [функцию-фабрику](https://ru.wikipedia.org/wiki/Фабричный_метод) `createSagaMiddleware` которая экспортируется для нас из `redux-saga` библиотеки.
 
-Before running our `helloSaga`, we must connect our middleware to the Store using `applyMiddleware`. Then we can use the `sagaMiddleware.run(helloSaga)` to start our Saga.
+Перед запуском нашей `helloSaga`, мы должны подключить созданный middleware в Store используя `applyMiddleware` *(мы его импортируем из Redux). Дальше мы можем использовать `sagaMiddleware.run(helloSaga)` для запуска работы нашей Саги.
 
-So far, our Saga does nothing special. It just logs a message then exits.
+Пока наша Сага не делает ничего особенного. Только выводит информационное сообщение.
 
-## Making Asynchronous calls
+## Создаем Асинхронные вызовы
 
 Now let's add something closer to the original Counter demo. To illustrate asynchronous calls, we will add another button to increment the counter 1 second after the click.
 
