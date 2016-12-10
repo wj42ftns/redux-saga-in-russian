@@ -82,7 +82,7 @@ sagaMiddleware.run(helloSaga)
 
 Теперь настало время сделать что-то более похожее на то, что мы видели в примере счетчика. Рассмотрим работу асинхронных вызовов, сделаем еще одну кнопку, которая будет увеличивать значение счетчика спустя 1 секунду после нажатия.
 
-Модифицируем наш компонент Counter в `Counter.js` - добавим ему новую кнопку, которая при клике будет вызывать [callback-функцию][https://ru.wikipedia.org/wiki/Callback_(%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)] `onIncrementAsync`
+Модифицируем наш компонент Counter в `Counter.js` - добавим ему новую кнопку, которая при клике будет вызывать [callback-функцию](https://ru.wikipedia.org/wiki/Callback_(%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)) `onIncrementAsync`
 
 ```javascript
 const Counter = ({ value, onIncrement, onDecrement, onIncrementAsync }) =>
@@ -126,7 +126,6 @@ Add the following code to the `sagas.js` module:
 import { takeEvery, delay } from 'redux-saga'
 import { put } from 'redux-saga/effects'
 
-// Our worker Saga: will perform the async increment task
 // наша Сага-рабочий: выполняет асинхронную работу
 export function* incrementAsync() {
   yield delay(1000)
@@ -143,22 +142,25 @@ export function* watchIncrementAsync() {
 
 Самое время объяснить, что тут происходит.
 
-Мы импортируем `delay`, вспомогательную функцию `redux-saga` возвращающую [Promise](https://learn.javascript.ru/promise) который перейдет в состояние resolve после ожидания переданного значения милисекунд. Мы будем использовать эту функцию чтобы *блокировать* генератор.
+Мы импортируем `delay`, вспомогательную функцию `redux-saga` возвращающую [Promise](https://learn.javascript.ru/promise) который перейдет в состояние resolve после ожидания переданного значения миллисекунд. Мы будем использовать эту функцию чтобы *блокировать* генератор.
 
-Sagas are implemented as [Generator functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*) that *yield* objects to the redux-saga middleware. The yielded objects are a kind of instruction to be interpreted by the middleware. When a Promise is yielded to the middleware, the middleware will suspend the Saga until the Promise completes. In the above example, the `incrementAsync` Saga is suspended until the Promise returned by `delay` resolves, which will happen after 1 second.
+Работа Саг основана на [функциях-генераторах](https://learn.javascript.ru/generator), используя которые `redux-sage middleware` с помощью ключевого слова *yield* приостанавливает выполнение инструкций последовательности действий Саг до тех пор пока не закончится выполнение асинхронных операций и promise(переданный в yield, в котором и происходят асинхронные операции) не перейдет в состояние resolve или reject.В примере выше, Сага `incrementAsync` остановит своё выполнение до тех пор пока promise возвращаемый функцией `delay`, не перейдет в состоянии resolve, в нашем примере это произойдет через 1 секунду.
 
-Once the Promise is resolved, the middleware will resume the Saga, executing code until the next yield. In this example, the next statement is another yielded object: the result of calling `put({type: 'INCREMENT'})`, which instructs the middleware to dispatch an `INCREMENT` action.
+Когда `promise` перейдет в состояние `resolve`, `middleware` продолжит выполнение саги, код будет продолжать выполняться до тех пор, пока не встретит следующий `yield`.
+В этом примере,следующая остановка выполнения кода произойдет до получения результата вызова: `put({type: 'INCREMENT'})`, который информирует `middleware` о отравке `INCREMENT` action.
 
-`put` is one example of what we call an *Effect*. Effects are simple JavaScript objects which contain instructions to be fulfilled by the middleware. When a middleware retrieves an Effect yielded by a Saga, the Saga is paused until the Effect is fulfilled.
+`put` это один из примеров того, как мы можем вызывать *эффекты*. Эффекты - это простые JavaScript объекты, которые содержат инструкции, которые нужно выполнить middleware. Когда middleware получает эффект - она приостанавливает дальнейшее выполнение Саги, до тех пор, пока эфект не будет выполнен.
 
-So to summarize, the `incrementAsync` Saga sleeps for 1 second via the call to `delay(1000)`, then dispatches an `INCREMENT` action.
+Подведем итог, `incrementAsync` сага ждет 1 секунду с помощью вызова `delay(1000)`, затем отправляет  `INCREMENT` action.
 
-Next, we created another Saga `watchIncrementAsync`. We use `takeEvery`, a helper function provided by `redux-saga`, to listen for dispatched `INCREMENT_ASYNC` actions and run `incrementAsync` each time.
+Создадим другую Сагу `watchIncrementAsync`. Мы использовали `takeEvery`, вспомогательную функцию предоставляемую `redux-saga`, чтобы начать прослушивать
+отправляемые `INCREMENT_ASYNC` actions и запускает на каждый action этого типа `incrementAsync`.
 
-Now we have 2 Sagas, and we need to start them both at once. To do that, we'll add a `rootSaga` that is responsible for starting our other Sagas. In the same file `sagas.js`, add the following code:
+Сейчас у нас есть 2 Саги, и нам нужно чтобы они работали обе одновременно. Чтобы это сделать , нам необходимо добавить в `rootSaga` запуск еще одной Саги.
+В файл `sagas.js` добавим следующий код:
 
 ```javascript
-// single entry point to start all Sagas at once
+// можно сделать одну точку запуска всех саг
 export default function* rootSaga() {
   yield [
     helloSaga(),
@@ -167,7 +169,8 @@ export default function* rootSaga() {
 }
 ```
 
-This Saga yields an array with the results of calling our two sagas, `helloSaga` and `watchIncrementAsync`. This means the two resulting Generators will be started in parallel. Now we only have to invoke `sagaMiddleware.run` on the root Saga in `main.js`.
+Эта в этой Сага мы можем увидеть, как можно передать в `yield` массив который вернет результат вызовов наших двух Саг,`helloSaga` и `watchIncrementAsync`.
+Таким образом мы можем осуществлять параллельное выполнение с ожиданием завершения всех параллельных действий перед дальнейшим выполнением кода. Сейчас нам всего-лишь запустить `sagaMiddleware.run` и передать в неё `rootSaga` в файле `main.js`.
 
 ```javascript
 // ...
