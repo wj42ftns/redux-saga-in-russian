@@ -169,7 +169,7 @@ export default function* rootSaga() {
 }
 ```
 
-Эта в этой Сага мы можем увидеть, как можно передать в `yield` массив который вернет результат вызовов наших двух Саг,`helloSaga` и `watchIncrementAsync`.
+Эта в этой Саге мы можем увидеть, как можно передать в `yield` массив который вернет результат вызовов наших двух Саг,`helloSaga` и `watchIncrementAsync`.
 Таким образом мы можем осуществлять параллельное выполнение с ожиданием завершения всех параллельных действий перед дальнейшим выполнением кода. Сейчас нам всего-лишь запустить `sagaMiddleware.run` и передать в неё `rootSaga` в файле `main.js`.
 
 ```javascript
@@ -183,11 +183,11 @@ sagaMiddleware.run(rootSaga)
 // ...
 ```
 
-## Making our code testable
+## Тестируем код
 
-We want to test our `incrementAsync` Saga to make sure it performs the desired task.
+Мы хотим протестировать работу `incrementAsync` Саги чтобы убедиться в правильности её работы.
 
-Create another file `sagas.spec.js`:
+Создадим файл `sagas.spec.js`:
 
 ```javascript
 import test from 'tape';
@@ -197,42 +197,39 @@ import { incrementAsync } from './sagas'
 test('incrementAsync Saga test', (assert) => {
   const gen = incrementAsync()
 
-  // now what ?
+  // что теперь произойдет ?
 });
 ```
 
-Since `incrementAsync` is a Generator function, when we run it outside the middleware,
-Each time you invoke `next` on the generator, you get an object of the following shape
+Поскольку `incrementAsync` это функция-генератор, когда мы запускаем её сами без middleware,
+Каждый вызов метода `next` у генератора, будет возвращать объект следующей структуры
 
 ```javascript
 gen.next() // => { done: boolean, value: any }
 ```
 
-The `value` field contains the yielded expression, i.e. the result of the expression after
-the `yield`. The `done` field indicates if the generator has terminated or if there are still
-more 'yield' expressions.
+Свойство `value` содержит в себе результат выполнения выражения,если он что-то возвращает, т.е. результат выражения, которое записано после `yield`.
+Свойство `done` является индикатором, остались ли в генераторе еще `yield` выражения.
 
-In the case of `incrementAsync`, the generator yields 2 values consecutively:
+В случае `incrementAsync`, генератор использует `yield` 2 раза последовательно:
 
 1. `yield delay(1000)`
 2. `yield put({type: 'INCREMENT'})`
 
-So if we invoke the next method of the generator 3 times consecutively we get the following
-results:
+Вызвав метод next геренатора трижды мы получим следующий результат:
 
 ```javascript
-gen.next() // => { done: false, value: <result of calling delay(1000)> }
-gen.next() // => { done: false, value: <result of calling put({type: 'INCREMENT'})> }
+gen.next() // => { done: false, value: <результат вызова delay(1000)> }
+gen.next() // => { done: false, value: <результат вызова put({type: 'INCREMENT'})> }
 gen.next() // => { done: true, value: undefined }
 ```
 
-The first 2 invocations return the results of the yield expressions. On the 3rd invocation
-since there is no more yield the `done` field is set to true. And since the `incrementAsync`
-Generator doesn't return anything (no `return` statement), the `value` field is set to
-`undefined`.
+Первые 2 вызова возвращают результат yield выражения. В 3 вызов, т.к. больше нет yield
+свойство `done` устанавливается в true. Так же, т.к. `incrementAsync` не возвращает никакого
+значения(через `return`), свойство `value` будет равно `undefined`.
 
-So now, in order to test the logic inside `incrementAsync`, we'll simply have to iterate
-over the returned Generator and check the values yielded by the generator.
+Итак, чтобы проверить логику работы внутри `incrementasync`, нужно просто проитерироваться(перебрать)
+возвращаемые значения генератором и сверить их с ожидаемыми
 
 ```javascript
 import test from 'tape';
@@ -245,16 +242,14 @@ test('incrementAsync Saga test', (assert) => {
   assert.deepEqual(
     gen.next(),
     { done: false, value: ??? },
-    'incrementAsync should return a Promise that will resolve after 1 second'
+    'incrementAsync должен вернуть Promise который перейдет в состояние resolve через 1 секунду'
   )
 });
 ```
 
-The issue is how do we test the return value of `delay`? We can't do a simple equality test
-on Promises. If `delay` returned a *normal* value, things would've been be easier to test.
+Как же протестировать возвращаемое значение от `delay`? Мы не можем просто сделать проверку Promise на равенство. Если `delay` вернет *нормальное* значение, тогда мы могли бы легко это протестировать.
 
-Well, `redux-saga` provides a way to make the above statement possible. Instead of calling
-`delay(1000)` directly inside `incrementAsync`, we'll call it *indirectly*:
+Благодаря `redux-saga` мы можем получить нужное нам поведение. Для этого необходимо вместо непосредственного вызова `delay(1000)` внутри `incrementAsync`, нужно сделать вызов с помощью `call`:
 
 ```javascript
 // ...
@@ -262,26 +257,26 @@ import { put, call } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
 
 export function* incrementAsync() {
-  // use the call Effect
+  //  используем call, предоставляемый redux-saga
   yield call(delay, 1000)
   yield put({ type: 'INCREMENT' })
 }
 ```
 
-Instead of doing `yield delay(1000)`, we're now doing `yield call(delay, 1000)`. What's the difference?
+Вместо `yield delay(1000)`, у нас теперь `yield call(delay, 1000)`. В чем же различие?
 
-In the first case, the yield expression `delay(1000)` is evaluated before it gets passed to the caller of `next` (the caller could be the middleware when running our code. It could also be our test code which runs the Generator function and iterates over the returned Generator). So what the caller gets is a Promise, like in the test code above.
+В первом случае, yield выражение `delay(1000)` будет сравниваться до того, как получит итоговое значение, оно будет передано в следующий вызов `next` ( вызов может быть middleware - когда срабатывает наш код. Так же может быть, что это наш тестирующий код, который запускает функцию-генератор и итерируется по возвращаемым значениям генератора). Таким образом при вызове - будет получен Promise, подобно тому как указано в коде выше.
 
-In the second case, the yield expression `call(delay, 1000)` is what gets passed to the caller of `next`. `call` just like `put`, returns an Effect which instructs the middleware to call a given function with the given arguments. In fact, neither `put` nor `call` performs any dispatch or asynchronous call by themselves, they simply return plain JavaScript objects.
+Во втором случае, yield выражение `call(delay, 1000)` будет передана вся необходимая информация в 'next'. `call` также как и `put`, возвращает описание действия которое произойдет в middleware при вызове данной функции с данными аргументами. Фактически ни `put` ни `call` сами не выполняют асинхронных действий, они просто возвращают инструкцию обычный JavaScript объект.  
 
 ```javascript
 put({type: 'INCREMENT'}) // => { PUT: {type: 'INCREMENT'} }
 call(delay, 1000)        // => { CALL: {fn: delay, args: [1000]}}
 ```
 
-What happens is that the middleware examines the type of each yielded Effect then decides how to fulfill that Effect. If the Effect type is a `PUT` then it will dispatch an action to the Store. If the Effect is a `CALL` then it'll call the given function.
+Middleware определяет тип каждого приостановленного redux-saga эффекта и решает выполнять ли этот эффект. Если эффект типа `PUT`, тогда произойдет отправка action в store. Если эффект `CALL` тогда, произойдет вызов данной функции.
 
-This separation between Effect creation and Effect execution makes it possible to test our Generator in a surprisingly easy way:
+Это разделение между созданием эффекта и его самим побочным эффектом позволяет очень легко протестировать генератор следующим образом:
 
 ```javascript
 import test from 'tape';
@@ -296,31 +291,31 @@ test('incrementAsync Saga test', (assert) => {
   assert.deepEqual(
     gen.next().value,
     call(delay, 1000),
-    'incrementAsync Saga must call delay(1000)'
+    'incrementAsync Saga должна вызвать delay(1000)'
   )
 
   assert.deepEqual(
     gen.next().value,
     put({type: 'INCREMENT'}),
-    'incrementAsync Saga must dispatch an INCREMENT action'
+    'incrementAsync Saga must отправить INCREMENT action'
   )
 
   assert.deepEqual(
     gen.next(),
     { done: true, value: undefined },
-    'incrementAsync Saga must be done'
+    'incrementAsync Saga должна окончить работу'
   )
 
   assert.end()
 });
 ```
 
-Since `put` and `call` return plain objects, we can reuse the same functions in our test code. And to test the logic of `incrementAsync`, we simply iterate over the generator and do `deepEqual` tests on its values.
+Так как `put` и `call` возвращают просто объекты, мы можем повторно использовать теже функции для тестирующего кода. И тогда тестируя логику `incrementAsync`, мы просто проитерируемся по генератору и сделаем тест на `deepEqual` (проверку объекта на полное соответствие) возвращаемых значений.
 
-In order to run the above test, run:
+Чтобы запустить выше описаный тест, запустите:
 
 ```sh
 $ npm test
 ```
 
-which should report the results on the console.
+В консоле должен вывестись результат с итогами тестирования.

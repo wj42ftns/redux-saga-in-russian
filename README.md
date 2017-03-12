@@ -4,7 +4,7 @@ Original [Redux-saga](https://yelouafi.github.io/redux-saga/index.html) document
 
 [![Join the chat at https://gitter.im/yelouafi/redux-saga](https://badges.gitter.im/yelouafi/redux-saga.svg)](https://gitter.im/yelouafi/redux-saga?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![npm version](https://img.shields.io/npm/v/redux-saga.svg?style=flat-square)](https://www.npmjs.com/package/redux-saga) [![CDNJS](https://img.shields.io/cdnjs/v/redux-saga.svg?style=flat-square)](https://cdnjs.com/libraries/redux-saga)
 
-`redux-saga` это библиотека,цель которой сделать работу с [побочными эффектами](https://ru.wikipedia.org/wiki/Побочный_эффект_(программирование) (таких как: асинхронные операции, работа с "[грязными](https://ru.wikipedia.org/wiki/%D0%A7%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B0_%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8)" функциями) в React/Redux приложениях проще и удобнее. 
+`redux-saga` это библиотека,цель которой сделать работу с [побочными эффектами](https://ru.wikipedia.org/wiki/Побочный_эффект_(программирование) (таких как: асинхронные операции, работа с "[грязными](https://ru.wikipedia.org/wiki/%D0%A7%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B0_%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8)" функциями) в React/Redux приложениях проще и удобнее.
 
 Идея `redux-saga` направлена на создание отдельного дополнительного звена в [потокe](https://rajdee.gitbooks.io/redux-in-russian/content/docs/basics/DataFlow.html) в вашем приложении, в котором будет осуществляться работа с побочными эфектами.
 `redux-saga` это [middleware](https://rajdee.gitbooks.io/redux-in-russian/content/docs/advanced/Middleware.html) для [redux](https://github.com/rajdee/redux-in-russian), которая предоставляет возможность запустить, приостановить или отменить поток из основного приложения с обычными redux [actions](https://rajdee.gitbooks.io/redux-in-russian/content/docs/basics/Actions.html), сага имеет доступ к redux состоянию приложения и может сама инициировать отправление redux actions.
@@ -21,7 +21,6 @@ Original [Redux-saga](https://yelouafi.github.io/redux-saga/index.html) document
 $ npm install --save redux-saga
 ```
 
-Alternatively, you may use the provided UMD builds directly in the `<script>` tag of an HTML page. See [this section](#using-umd-build-in-the-browser).
 Так же вы можете подключить с помощью UMD([Universal Module Definition](https://github.com/umdjs/umd))  библиотеки сагу непосредственно в тег `<script>` в HTML странице. Подробнее можно посмотреть [ниже](#using-umd-build-in-the-browser).
 
 ## Пример использования
