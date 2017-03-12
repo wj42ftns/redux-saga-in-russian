@@ -1,4 +1,4 @@
-# redux-saga-in-russian
+# redux-saga-tutorial-in-russian
 
 Original [Redux-saga](https://yelouafi.github.io/redux-saga/index.html) documentation with a translation into Russian
 
