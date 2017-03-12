@@ -132,7 +132,6 @@ sagaMiddleware.run(mySaga)
 - [https://unpkg.com/redux-saga/dist/redux-saga.min.js](https://unpkg.com/redux-saga/dist/redux-saga.min.js)
 
 
-**Important!** If the browser you are targeting doesn't support *ES2015 generators*, you must provide a valid polyfill, such as [the one provided by `babel`](). The polyfill must be imported before **redux-saga**:
 **Важно!** Если ваша целевая аудитория использует браузеры не поддерживающие *ES2015 генераторы*, тогда вам нужно использовать [полифилл](https://learn.javascript.ru/dom-polyfill), например:
 ['babel'](https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.25/browser-polyfill.min.js). Полифилл должен находиться **до** `redux-saga`
 
